@@ -44,70 +44,70 @@
 
 // Uncomment and set up if you want to use custom pins for the SPI communication
 #define REASSIGN_PINS
-int sck = 12;
-int miso = 14;
-int mosi = 13;
-int cs = 15;
+int sck = 40;
+int miso = 39;
+int mosi = 14;
+int cs = 12;
 
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
-    Serial.printf("Listing directory: %s\n", dirname);
+    printf("Listing directory: %s\n", dirname);
 
     File root = fs.open(dirname);
     if (!root) {
-        Serial.println("Failed to open directory");
+        printf("Failed to open directory\n");
         return;
     }
     if (!root.isDirectory()) {
-        Serial.println("Not a directory");
+        printf("Not a directory\n");
         return;
     }
 
     File file = root.openNextFile();
     while (file) {
         if (file.isDirectory()) {
-            Serial.print("  DIR : ");
-            Serial.println(file.name());
+            printf("  DIR : ");
+            printf("%s\n", file.name());
             if (levels) {
                 listDir(fs, file.path(), levels - 1);
             }
         } else {
-            Serial.print("  FILE: ");
-            Serial.print(file.name());
-            Serial.print("  SIZE: ");
-            Serial.println(file.size());
+            printf("  FILE: ");
+            printf("%s\n", file.name());
+            printf("  SIZE: ");
+            printf("%d\n", file.size());
         }
         file = root.openNextFile();
     }
 }
 
 void createDir(fs::FS &fs, const char *path) {
-    Serial.printf("Creating Dir: %s\n", path);
+    printf("Creating Dir: %s\n", path);
     if (fs.mkdir(path)) {
-        Serial.println("Dir created");
+        printf("Dir created\n");
     } else {
-        Serial.println("mkdir failed");
+        printf("mkdir failed\n");
     }
 }
 
 void removeDir(fs::FS &fs, const char *path) {
-    Serial.printf("Removing Dir: %s\n", path);
+    printf("Removing Dir: %s\n", path);
     if (fs.rmdir(path)) {
-        Serial.println("Dir removed");
+        printf("Dir removed\n");
     } else {
-        Serial.println("rmdir failed");
+        printf("rmdir failed\n");
     }
 }
 
 void readFile(fs::FS &fs, const char *path) {
-    Serial.printf("Reading file: %s\n", path);
+    printf("Reading file: %s\n", path);
 
     File file = fs.open(path);
     if (!file) {
-        Serial.println("Failed to open file for reading");
+        printf("Failed to open file for reading\n");
         return;
     }
 
-    Serial.print("Read from file: ");
+    printf("Read from file: \n");
     while (file.available()) {
         Serial.write(file.read());
     }
@@ -115,52 +115,52 @@ void readFile(fs::FS &fs, const char *path) {
 }
 
 void writeFile(fs::FS &fs, const char *path, const char *message) {
-    Serial.printf("Writing file: %s\n", path);
+    printf("Writing file: %s\n", path);
 
     File file = fs.open(path, FILE_WRITE);
     if (!file) {
-        Serial.println("Failed to open file for writing");
+        printf("Failed to open file for writing\n");
         return;
     }
     if (file.print(message)) {
-        Serial.println("File written");
+        printf("File written\n");
     } else {
-        Serial.println("Write failed");
+        printf("Write failed\n");
     }
     file.close();
 }
 
 void appendFile(fs::FS &fs, const char *path, const char *message) {
-    Serial.printf("Appending to file: %s\n", path);
+    printf("Appending to file: %s\n", path);
 
     File file = fs.open(path, FILE_APPEND);
     if (!file) {
-        Serial.println("Failed to open file for appending");
+        printf("Failed to open file for appending\n");
         return;
     }
     if (file.print(message)) {
-        Serial.println("Message appended");
+        printf("Message appended\n");
     } else {
-        Serial.println("Append failed");
+        printf("Append failed\n");
     }
     file.close();
 }
 
 void renameFile(fs::FS &fs, const char *path1, const char *path2) {
-    Serial.printf("Renaming file %s to %s\n", path1, path2);
+    printf("Renaming file %s to %s\n", path1, path2);
     if (fs.rename(path1, path2)) {
-        Serial.println("File renamed");
+        printf("File renamed\n");
     } else {
-        Serial.println("Rename failed");
+        printf("Rename failed\n");
     }
 }
 
 void deleteFile(fs::FS &fs, const char *path) {
-    Serial.printf("Deleting file: %s\n", path);
+    printf("Deleting file: %s\n", path);
     if (fs.remove(path)) {
-        Serial.println("File deleted");
+        printf("File deleted\n");
     } else {
-        Serial.println("Delete failed");
+        printf("Delete failed\n");
     }
 }
 
@@ -183,15 +183,15 @@ void testFileIO(fs::FS &fs, const char *path) {
             len -= toRead;
         }
         end = millis() - start;
-        Serial.printf("%u bytes read for %lu ms\n", flen, end);
+        printf("%u bytes read for %lu ms\n", flen, end);
         file.close();
     } else {
-        Serial.println("Failed to open file for reading");
+        printf("Failed to open file for reading\n");
     }
 
     file = fs.open(path, FILE_WRITE);
     if (!file) {
-        Serial.println("Failed to open file for writing");
+        printf("Failed to open file for writing\n");
         return;
     }
 
@@ -201,7 +201,7 @@ void testFileIO(fs::FS &fs, const char *path) {
         file.write(buf, 512);
     }
     end = millis() - start;
-    Serial.printf("%u bytes written for %lu ms\n", 2048 * 512, end);
+    printf("%u bytes written for %lu ms\n", 2048 * 512, end);
     file.close();
 }
 
@@ -217,44 +217,44 @@ void setup() {
 #else
     if (!SD.begin()) {
 #endif
-        Serial.println("Card Mount Failed");
+        printf("Card Mount Failed\n");
         return;
     }
     uint8_t cardType = SD.cardType();
 
     if (cardType == CARD_NONE) {
-        Serial.println("No SD card attached");
+        printf("No SD card attached\n");
         return;
     }
 
-    Serial.print("SD Card Type: ");
+    printf("SD Card Type: ");
     if (cardType == CARD_MMC) {
-        Serial.println("MMC");
+        printf("MMC\n");
     } else if (cardType == CARD_SD) {
-        Serial.println("SDSC");
+        printf("SDSC\n");
     } else if (cardType == CARD_SDHC) {
-        Serial.println("SDHC");
+        printf("SDHC\n");
     } else {
-        Serial.println("UNKNOWN");
+        printf("UNKNOWN\n");
     }
 
     uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-    Serial.printf("SD Card Size: %lluMB\n", cardSize);
+    printf("SD Card Size: %lluMB\n", cardSize);
 
-    listDir(SD, "/", 0);
-    createDir(SD, "/mydir");
-    listDir(SD, "/", 0);
-    removeDir(SD, "/mydir");
-    listDir(SD, "/", 2);
-    writeFile(SD, "/hello.txt", "Hello ");
-    appendFile(SD, "/hello.txt", "World!\n");
-    readFile(SD, "/hello.txt");
-    deleteFile(SD, "/foo.txt");
-    renameFile(SD, "/hello.txt", "/foo.txt");
-    readFile(SD, "/foo.txt");
-    testFileIO(SD, "/test.txt");
-    Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
-    Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
+    // listDir(SD, "/", 0);
+    // createDir(SD, "/mydir");
+    // listDir(SD, "/", 0);
+    // removeDir(SD, "/mydir");
+    // listDir(SD, "/", 2);
+    // writeFile(SD, "/hello.txt", "Hello ");
+    // appendFile(SD, "/hello.txt", "World!\n");
+    // readFile(SD, "/hello.txt");
+    // deleteFile(SD, "/foo.txt");
+    // renameFile(SD, "/hello.txt", "/foo.txt");
+    // readFile(SD, "/foo.txt");
+    // testFileIO(SD, "/test.txt");
+    printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
+    printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
 }
 
 void loop() {}
